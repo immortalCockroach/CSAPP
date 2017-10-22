@@ -75,6 +75,8 @@ bool q_insert_head(queue_t *q, int v)
       return false;
     }
     /* What if malloc returned NULL? */
+
+    // 使newh成为链表的第一个节点
     newh->value = v;
     newh->next = q->head;
     q->head = newh;
@@ -107,10 +109,12 @@ bool q_insert_tail(queue_t *q, int v)
     newt->value = v;
     newt->next = NULL;
 
+    // 如果是第一个元素，则head和tail指针都指向该元素
     if (q->tail == NULL) {
       q->tail = newt;
       q->head = newt;
     } else {
+      // 如果不是第一个元素 将尾部的元素的next指向新分配的节点，tail指向新尾部
       q->tail->next = newt;
       q->tail = newt;
     }
@@ -137,10 +141,10 @@ bool q_remove_head(queue_t *q, int *vp)
     if (vp != NULL) {
       *vp = q->head->value;
     }
+    // 将第一个元素从链表中断开
     list_ele_t *oldh = q->head;
     q->head = oldh->next;
     q->size--;
-
     oldh->next = NULL;
     
     // 删除head时，可能改变tail
