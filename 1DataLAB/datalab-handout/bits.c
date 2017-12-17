@@ -163,7 +163,10 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return (x >> n) & (~((~1) << (31 + (~n) + 1)));
+  int shift = ~(1 << 31);
+  shift = ((shift >> n) << 1) + 1;
+
+  return (x >> n) & shift;
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -231,7 +234,7 @@ int fitsBits(int x, int n) {
  */
 int divpwr2(int x, int n) {
     int signx = (x >> 31) & 1;     //
-    int mask = (1 << n) + (~0);
+    int mask = (1 << n) + (~1) + 1;
     int bias = signx & !!(mask & x);
     return (x >> n) + bias;
 }
@@ -253,8 +256,7 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  int bias = !x;
-  return (~(x >> 31) & 1) + (~bias + 1);
+  return (~(x >> 31) & 1) + (~(!x) + 1);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -362,13 +364,15 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  unsigned f = uf;
-    // 全0
-    if ((f & 0x7f800000) == 0) {
-       return (((uf & 0x007fffff) << 1) | (uf & 0xff800000));
-    } else if ((f & 0x7f800000) != 0x7f800000) { // 非全1
-      f += 0x00800000;   
+
+    if ((uf & 0x7f800000) == 0x7f800000) { // NaN或者无穷
+      return uf; 
+    } else if ((uf & 0x7f800000) == 0) { // 全0
+      return (((uf & 0x007fffff) << 1) | (uf & 0xff800000)); // 尾数右移
+    } else {
+      // 阶码+1
+      uf += 0x00800000;   
+      return uf;
     }
-    return f;
   
 }
